@@ -66,6 +66,162 @@ class CountryService {
       throw error;
     }
   }
+
+  /* Search countries with filters and options */
+  async searchCountries(
+    query = "",
+    continent = "",
+    page = 1,
+    limit = 12,
+    sortBy = "name"
+  ) {
+    try {
+      if (this.useApiDataSource) {
+        return await this.searchCountriesFromAPI(
+          query,
+          continent,
+          page,
+          limit,
+          sortBy
+        );
+      } else {
+        return await this.searchCountriesFromDB(
+          query,
+          continent,
+          page,
+          limit,
+          sortBy
+        );
+      }
+    } catch (error) {
+      console.error("Error searching countries:", error);
+      throw error;
+    }
+  }
+
+  /*Search countries from API*/
+  async searchCountriesFromAPI(query, continent, page, limit, sortBy) {
+    try {
+      let url = `${this.apiUrl}/all`;
+
+      if (query) {
+        url = `${this.apiUrl}/name/${encodeURIComponent(query)}`;
+      }
+
+      const fields =
+        "name,cca2,cca3,capital,region,subregion,population,flags,currencies,continents";
+      const separator = url.includes("?") ? "&" : "?";
+      const response = await axios.get(`${url}${separator}fields=${fields}`, {
+        timeout: 10000,
+      });
+
+      let countries = response.data;
+
+      //only show continent specific countries
+      if (continent) {
+        countries = countries.filter(
+          (country) =>
+            country.continents && country.continents.includes(continent)
+        );
+      }
+
+      // Sorting
+      countries = this.sortCountries(countries, sortBy);
+
+      // Pagination
+      const totalCount = countries.length;
+      const startIndex = (page - 1) * limit;
+      const paginatedCountries = countries.slice(
+        startIndex,
+        startIndex + limit
+      );
+
+      return {
+        countries: paginatedCountries,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        currentPage: page,
+        hasNextPage: page < Math.ceil(totalCount / limit),
+        hasPrevPage: page > 1,
+      };
+    } catch (error) {
+      console.error("Error searching countries from API:", error);
+      if (error.response?.status === 404) {
+        return {
+          countries: [],
+          totalCount: 0,
+          totalPages: 0,
+          currentPage: page,
+          hasNextPage: false,
+          hasPrevPage: false,
+        };
+      }
+      throw error;
+    }
+  }
+
+  /* Search countries from MongoDB */
+  async searchCountriesFromDB(query, continent, page, limit, sortBy) {
+    try {
+      await connectToDatabase();
+
+      let filter = {};
+
+      //Searching
+      if (query) {
+        filter.$or = [
+          { "name.common": { $regex: query, $options: "i" } },
+          { "name.official": { $regex: query, $options: "i" } },
+          { capital: { $elemMatch: { $regex: query, $options: "i" } } },
+        ];
+      }
+
+      //Continent Filter
+      if (continent) {
+        filter.continents = continent;
+      }
+
+      //Sorting info
+      let sort = {};
+      switch (sortBy) {
+        case "capital":
+          sort = { capital: 1 };
+          break;
+        case "currency":
+          sort = { currencies: 1 };
+          break;
+        case "name":
+        default:
+          sort = { "name.common": 1 };
+          break;
+      }
+
+      //Query execution with filters and sort info, and pagination
+      const [countries, totalCount] = await Promise.all([
+        Country.find(filter)
+          .select(
+            "name cca2 cca3 capital region subregion population flags currencies continents"
+          )
+          .sort(sort)
+          .skip((page - 1) * limit)
+          .limit(limit)
+          .lean(),
+        Country.countDocuments(filter),
+      ]);
+
+      return {
+        countries,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        currentPage: page,
+        hasNextPage: page < Math.ceil(totalCount / limit),
+        hasPrevPage: page > 1,
+      };
+    } catch (error) {
+      console.error("Error searching countries from DB:", error);
+      throw error;
+    }
+  }
 }
 
 const countryServiceObject = new CountryService();
