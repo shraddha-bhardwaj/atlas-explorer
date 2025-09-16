@@ -222,6 +222,30 @@ class CountryService {
       throw error;
     }
   }
+
+  /*Get all continents*/
+  async getContinents() {
+    try {
+      if (this.useApiDataSource) {
+        return [
+          "Africa",
+          "Antarctica",
+          "Asia",
+          "Europe",
+          "North America",
+          "Oceania",
+          "South America",
+        ];
+      } else {
+        await connectToDatabase();
+        const continents = await Country.distinct("continents");
+        return continents.sort();
+      }
+    } catch (error) {
+      console.error("Error getting continents:", error);
+      throw error;
+    }
+  }
 }
 
 const countryServiceObject = new CountryService();
