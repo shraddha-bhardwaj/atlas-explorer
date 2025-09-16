@@ -77,3 +77,22 @@ export function useCountries({
     gcTime: 5 * 60 * 1000,
   });
 }
+
+export function useCountryDetails(countryCode) {
+  return useQuery({
+    queryKey: ["country-details", countryCode],
+    queryFn: async () => {
+      const response = await fetch(`/api/countries/${countryCode}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error("Country not found");
+        }
+        throw new Error("Failed to fetch country details");
+      }
+      return response.json();
+    },
+    enabled: !!countryCode,
+    staleTime: 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
+  });
+}

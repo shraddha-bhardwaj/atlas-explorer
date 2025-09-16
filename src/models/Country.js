@@ -10,7 +10,6 @@ const CountrySchema = new mongoose.Schema(
     cca3: { type: String, required: true, unique: true },
     capital: [{ type: String }],
     region: { type: String, index: true },
-    subregion: { type: String },
     population: { type: Number },
     area: { type: Number },
     flags: {
@@ -29,31 +28,9 @@ const CountrySchema = new mongoose.Schema(
       type: Map,
       of: String,
     },
-    borders: [{ type: String }],
     timezones: [{ type: String }],
     continents: [{ type: String, index: true }],
     latlng: [{ type: Number }],
-    landlocked: { type: Boolean },
-    independent: { type: Boolean },
-    unMember: { type: Boolean },
-    coatOfArms: {
-      png: String,
-      svg: String,
-    },
-    car: {
-      signs: [String],
-      side: String,
-    },
-    fifa: String,
-    gini: {
-      type: Map,
-      of: Number,
-    },
-    idd: {
-      root: String,
-      suffixes: [String],
-    },
-    startOfWeek: String,
     capitalInfo: {
       latlng: [Number],
     },

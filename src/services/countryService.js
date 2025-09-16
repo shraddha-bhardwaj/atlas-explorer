@@ -324,6 +324,76 @@ class CountryService {
       throw error;
     }
   }
+
+  /*get country details by country code*/
+  async getCountryDetails(countryCode) {
+    try {
+      if (this.useApiDataSource) {
+        return await this.getCountryDetailsFromAPI(countryCode);
+      } else {
+        return await this.getCountryDetailsFromDB(countryCode);
+      }
+    } catch (error) {
+      console.error("Error getting country details:", error);
+      throw error;
+    }
+  }
+
+  /* country details from API*/
+  async getCountryDetailsFromAPI(countryCode) {
+    try {
+      const response = await axios.get(`${this.apiUrl}/alpha/${countryCode}`, {
+        timeout: 10000,
+      });
+      return response.data[0];
+    } catch (error) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  /*Get country details from MongoDB */
+  async getCountryDetailsFromDB(countryCode) {
+    try {
+      await connectToDatabase();
+      const country = await Country.findOne({
+        $or: [
+          { cca2: countryCode.toUpperCase() },
+          { cca3: countryCode.toUpperCase() },
+        ],
+      }).lean();
+
+      return country;
+    } catch (error) {
+      console.error("Error getting country details from DB:", error);
+      throw error;
+    }
+  }
+
+  //   Sort utility function
+  sortCountries(countries, sortBy) {
+    switch (sortBy) {
+      case "capital":
+        return countries.sort((a, b) => {
+          const capitalA = a.capital?.[0] || "";
+          const capitalB = b.capital?.[0] || "";
+          return capitalA.localeCompare(capitalB);
+        });
+      case "currency":
+        return countries.sort((a, b) => {
+          const currencyA = Object.values(a.currencies || {})[0]?.name || "";
+          const currencyB = Object.values(b.currencies || {})[0]?.name || "";
+          return currencyA.localeCompare(currencyB);
+        });
+      case "name":
+      default:
+        return countries.sort((a, b) =>
+          a.name.common.localeCompare(b.name.common)
+        );
+    }
+  }
 }
 
 const countryServiceObject = new CountryService();

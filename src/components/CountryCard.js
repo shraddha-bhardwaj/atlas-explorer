@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   formatPopulation,
@@ -15,7 +14,9 @@ export default function CountryCard({ country }) {
 
   const countryCode = country.cca2 || country.cca3;
 
-  const handleCardClick = () => {};
+  const handleCardClick = () => {
+    router.push(`/country/${countryCode}`);
+  };
 
   const flagUrl =
     country.flags?.png || country.flags?.svg || "/placeholder-flag.svg";
