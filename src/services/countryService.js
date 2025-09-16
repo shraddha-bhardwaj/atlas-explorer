@@ -246,6 +246,84 @@ class CountryService {
       throw error;
     }
   }
+
+  /* Autocomplete country suggestions */
+  async getCountrySuggestions(query, continent = "", limit = 10) {
+    try {
+      if (this.useApiDataSource) {
+        return await this.getCountrySuggestionsFromAPI(query, continent, limit);
+      } else {
+        return await this.getCountrySuggestionsFromDB(query, continent, limit);
+      }
+    } catch (error) {
+      console.error("Error getting country suggestions:", error);
+      throw error;
+    }
+  }
+
+  /*Suggestions from API */
+  async getCountrySuggestionsFromAPI(query, continent, limit) {
+    try {
+      const response = await axios.get(
+        `${this.apiUrl}/name/${encodeURIComponent(
+          query
+        )}?fields=name,continents`,
+        {
+          timeout: 5000,
+        }
+      );
+
+      let countries = response.data;
+
+      if (continent) {
+        countries = countries.filter(
+          (country) =>
+            country.continents && country.continents.includes(continent)
+        );
+      }
+
+      return countries.slice(0, limit).map((country) => ({
+        name: country.name.common,
+        official: country.name.official,
+      }));
+    } catch (error) {
+      if (error.response?.status === 404) {
+        return [];
+      }
+      throw error;
+    }
+  }
+
+  /*suggestions from MongoDB*/
+  async getCountrySuggestionsFromDB(query, continent, limit) {
+    try {
+      await connectToDatabase();
+
+      let filter = {
+        $or: [
+          { "name.common": { $regex: query, $options: "i" } },
+          { "name.official": { $regex: query, $options: "i" } },
+        ],
+      };
+
+      if (continent) {
+        filter.continents = continent;
+      }
+
+      const countries = await Country.find(filter)
+        .select("name")
+        .limit(limit)
+        .lean();
+
+      return countries.map((country) => ({
+        name: country.name.common,
+        official: country.name.official,
+      }));
+    } catch (error) {
+      console.error("Error getting suggestions from DB:", error);
+      throw error;
+    }
+  }
 }
 
 const countryServiceObject = new CountryService();

@@ -1,3 +1,5 @@
+import SearchBar from "@/components/SearchBar";
+
 export default function Home() {
   return (
     <div className="relative min-h-screen">
@@ -17,6 +19,9 @@ export default function Home() {
             Discover countries around the world. Search by name, filter by
             continent, and view details about it.
           </p>
+        </div>
+        <div className="w-full max-w-2xl mx-auto">
+          <SearchBar />
         </div>
       </div>
     </div>
