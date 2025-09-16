@@ -44,3 +44,36 @@ export function useCountrySuggestions({ query, continent = "", limit = 8 }) {
     gcTime: 30 * 60 * 1000,
   });
 }
+
+//get all countries vased on params
+export function useCountries({
+  query = "",
+  continent = "",
+  page = 1,
+  sortBy = "name",
+  limit = 12,
+}) {
+  const queryKey = ["countries", { query, continent, page, sortBy, limit }];
+
+  return useQuery({
+    queryKey,
+    queryFn: async () => {
+      const params = createSearchParams({
+        q: query,
+        continent,
+        page,
+        sortBy,
+        limit,
+      });
+
+      const response = await fetch(`/api/countries?${params}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch countries");
+      }
+      return response.json();
+    },
+    enabled: true,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+  });
+}
