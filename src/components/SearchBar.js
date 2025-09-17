@@ -106,8 +106,8 @@ export default function SearchBar({
   return (
     <div className={`relative ${className}`}>
       <form onSubmit={handleSearch} className="w-full">
-        <div className={`flex flex-col gap-4`}>
-          <div className={`w-full max-w-xs mx-auto`}>
+        <div className={`flex sm:flex-row gap-4 items-center flex-col`}>
+          <div className={`w-full max-w-[200px]`}>
             <select
               value={continent}
               onChange={handleContinentChange}
@@ -126,7 +126,7 @@ export default function SearchBar({
             </select>
           </div>
 
-          <div className={`relative flex-1 max-w-2xl mx-auto`}>
+          <div className={`relative flex-1 w-full`}>
             <input
               ref={inputRef}
               type="text"

@@ -6,6 +6,7 @@ import CountryCard from "@/components/CountryCard";
 import { useCountries } from "@/hooks/useCountries";
 import { createSearchParams } from "@/utils/helpers";
 import Pagination from "@/components/Pagination";
+import SearchBar from "@/components/SearchBar";
 
 export default function SearchComponent() {
   const searchParams = useSearchParams();
@@ -52,8 +53,37 @@ export default function SearchComponent() {
     router.push(`/search?${params}`);
   };
 
+  const handleSearch = ({ query: newQuery, continent: newContinent }) => {
+    const params = createSearchParams({
+      q: newQuery,
+      continent: newContinent,
+      sortBy: sortBy,
+    });
+    router.push(`/search?${params}`);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-bold text-gray-900">Search Results</h1>
+            <button
+              onClick={() => router.push("/")}
+              className="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              ← Back to Home
+            </button>
+          </div>
+
+          <SearchBar
+            isCompact
+            initialQuery={query}
+            initialContinent={continent}
+            onSearch={handleSearch}
+          />
+        </div>
+      </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
           <div className="mb-4 sm:mb-0">
@@ -150,14 +180,8 @@ export default function SearchComponent() {
               No countries found
             </h3>
             <p className="text-gray-600 mb-4">
-              Try adjusting your search terms or removing filters.
+              Please try again with different name or removing filters.
             </p>
-            <button
-              onClick={() => router.push("/")}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Start New Search
-            </button>
           </div>
         )}
 
