@@ -3,64 +3,27 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import CountryCard from "@/components/CountryCard";
 
-import { useCountries } from "@/hooks/useCountries";
-import { createSearchParams } from "@/utils/helpers";
 import Pagination from "@/components/Pagination";
 import SearchBar from "@/components/SearchBar";
+import { useSearchPage } from "@/hooks/useSearchPage";
 
 export default function SearchComponent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-
   const query = searchParams.get("q") || "";
   const continent = searchParams.get("continent") || "";
   const page = parseInt(searchParams.get("page") || "1");
   const sortBy = searchParams.get("sortBy") || "name";
 
   const {
-    data: searchData,
-    isLoading: loading,
-    error,
-    isFetching,
-  } = useCountries({
-    query,
-    continent,
-    page,
-    sortBy,
-    limit: 12,
-  });
-
-  const countries = searchData?.countries || [];
-
-  const handleSortChange = (e) => {
-    const newSortBy = e.target.value;
-    const params = createSearchParams({
-      q: query,
-      continent: continent,
-      page: 1,
-      sortBy: newSortBy,
-    });
-    router.push(`/search?${params}`);
-  };
-
-  const handlePageChange = (newPage) => {
-    const params = createSearchParams({
-      q: query,
-      continent: continent,
-      page: newPage,
-      sortBy: sortBy,
-    });
-    router.push(`/search?${params}`);
-  };
-
-  const handleSearch = ({ query: newQuery, continent: newContinent }) => {
-    const params = createSearchParams({
-      q: newQuery,
-      continent: newContinent,
-      sortBy: sortBy,
-    });
-    router.push(`/search?${params}`);
-  };
+    handleSortChange,
+    handlePageChange,
+    handleSearch,
+    countries,
+    isCountriesDataLoading,
+    isCountriesDataError,
+    isCountriesDataFetching,
+  } = useSearchPage({ query, continent, page, sortBy });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -87,13 +50,13 @@ export default function SearchComponent() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
           <div className="mb-4 sm:mb-0">
-            {loading ? (
+            {isCountriesDataLoading ? (
               <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
             ) : (
               <p className="text-gray-600">
-                {searchData?.totalCount === 0
+                {countries?.totalCount === 0
                   ? "No countries found"
-                  : `Search results with ${searchData?.totalCount} countries`}
+                  : `Search results with ${countries?.totalCount} countries`}
                 {query && (
                   <span>
                     {" "}
@@ -120,7 +83,7 @@ export default function SearchComponent() {
               value={sortBy}
               onChange={handleSortChange}
               className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              disabled={loading}
+              disabled={isCountriesDataLoading}
             >
               <option value="name">Country Name</option>
               <option value="capital">Capital City</option>
@@ -129,7 +92,7 @@ export default function SearchComponent() {
           </div>
         </div>
 
-        {error && !loading && (
+        {isCountriesDataError && !isCountriesDataLoading && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
             <div className="text-red-600 mb-2">
               <svg
@@ -149,7 +112,7 @@ export default function SearchComponent() {
             <h3 className="text-lg font-medium text-red-900 mb-1">
               Error Loading Results
             </h3>
-            <p className="text-red-700">{error.message}</p>
+            <p className="text-red-700">{isCountriesDataError.message}</p>
             <button
               onClick={() => window.location.reload()}
               className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
@@ -159,51 +122,55 @@ export default function SearchComponent() {
           </div>
         )}
 
-        {!loading && !error && countries.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <svg
-                className="w-16 h-16 mx-auto"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
+        {!isCountriesDataLoading &&
+          !isCountriesDataError &&
+          countries.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <svg
+                  className="w-16 h-16 mx-auto"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-1">
+                No countries found
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Please try again with different name or removing filters.
+              </p>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-1">
-              No countries found
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Please try again with different name or removing filters.
-            </p>
-          </div>
-        )}
+          )}
 
-        {!loading && !error && countries.length > 0 && (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-              {countries.map((country) => (
-                <CountryCard
-                  key={country.cca2 || country.cca3}
-                  country={country}
-                />
-              ))}
-            </div>
-          </>
-        )}
-        {searchData?.totalPages > 1 && (
+        {!isCountriesDataLoading &&
+          !isCountriesDataError &&
+          countries.length > 0 && (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                {countries.map((country) => (
+                  <CountryCard
+                    key={country.cca2 || country.cca3}
+                    country={country}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        {countries?.totalPages > 1 && (
           <Pagination
-            currentPage={searchData?.currentPage}
-            totalPages={searchData?.totalPages}
+            currentPage={countries?.currentPage}
+            totalPages={countries?.totalPages}
             onPageChange={handlePageChange}
-            hasNextPage={searchData?.hasNextPage}
-            hasPrevPage={searchData?.hasPrevPage}
+            hasNextPage={countries?.hasNextPage}
+            hasPrevPage={countries?.hasPrevPage}
           />
         )}
       </div>
