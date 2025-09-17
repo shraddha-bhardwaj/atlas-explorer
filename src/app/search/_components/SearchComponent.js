@@ -5,6 +5,7 @@ import CountryCard from "@/components/CountryCard";
 
 import { useCountries } from "@/hooks/useCountries";
 import { createSearchParams } from "@/utils/helpers";
+import Pagination from "@/components/Pagination";
 
 export default function SearchComponent() {
   const searchParams = useSearchParams();
@@ -41,6 +42,16 @@ export default function SearchComponent() {
     router.push(`/search?${params}`);
   };
 
+  const handlePageChange = (newPage) => {
+    const params = createSearchParams({
+      q: query,
+      continent: continent,
+      page: newPage,
+      sortBy: sortBy,
+    });
+    router.push(`/search?${params}`);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -50,9 +61,9 @@ export default function SearchComponent() {
               <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
             ) : (
               <p className="text-gray-600">
-                {searchData.totalCount === 0
+                {searchData?.totalCount === 0
                   ? "No countries found"
-                  : `Search results with ${searchData.totalCount} countries`}
+                  : `Search results with ${searchData?.totalCount} countries`}
                 {query && (
                   <span>
                     {" "}
@@ -161,6 +172,15 @@ export default function SearchComponent() {
               ))}
             </div>
           </>
+        )}
+        {searchData?.totalPages > 1 && (
+          <Pagination
+            currentPage={searchData?.currentPage}
+            totalPages={searchData?.totalPages}
+            onPageChange={handlePageChange}
+            hasNextPage={searchData?.hasNextPage}
+            hasPrevPage={searchData?.hasPrevPage}
+          />
         )}
       </div>
     </div>
