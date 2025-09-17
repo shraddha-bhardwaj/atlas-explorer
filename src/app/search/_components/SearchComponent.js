@@ -77,7 +77,7 @@ export default function SearchComponent() {
           </div>
 
           <SearchBar
-            isCompact
+            variant="compact"
             initialQuery={query}
             initialContinent={continent}
             onSearch={handleSearch}
