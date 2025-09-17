@@ -1,17 +1,12 @@
 import { createSearchParams } from "@/utils/helpers";
 import { useQuery } from "@tanstack/react-query";
+import { apiGet } from "@/utils/apiClient";
 
 // Get all continents
 export function useContinents() {
   return useQuery({
     queryKey: ["continents"],
-    queryFn: async () => {
-      const response = await fetch("/api/continents");
-      if (!response.ok) {
-        throw new Error("Failed to fetch continents");
-      }
-      return response.json();
-    },
+    queryFn: () => apiGet("/api/continents"),
     staleTime: 24 * 60 * 60 * 1000, // caching set to 24 hours as continents do not change
     gcTime: 7 * 24 * 60 * 60 * 1000, // gctime set to 7 days
   });
@@ -30,14 +25,7 @@ export function useCountrySuggestions({ query, continent = "", limit = 8 }) {
         continent,
         limit,
       });
-      console.log("here");
-
-      const response = await fetch(`/api/countries/suggestions?${params}`);
-      console.log(response);
-      if (!response.ok) {
-        throw new Error("Failed to fetch suggestions");
-      }
-      return response.json();
+      return apiGet(`/api/countries/suggestions?${params}`);
     },
     enabled: !!(query && query.length >= 2),
     staleTime: 10 * 60 * 1000,
@@ -65,12 +53,7 @@ export function useCountries({
         sortBy,
         limit,
       });
-
-      const response = await fetch(`/api/countries?${params}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch countries");
-      }
-      return response.json();
+      return apiGet(`/api/countries?${params}`);
     },
     enabled: true,
     staleTime: 2 * 60 * 1000,
@@ -81,16 +64,7 @@ export function useCountries({
 export function useCountryDetails(countryCode) {
   return useQuery({
     queryKey: ["country-details", countryCode],
-    queryFn: async () => {
-      const response = await fetch(`/api/countries/${countryCode}`);
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error("Country not found");
-        }
-        throw new Error("Failed to fetch country details");
-      }
-      return response.json();
-    },
+    queryFn: () => apiGet(`/api/countries/${countryCode}`),
     enabled: !!countryCode,
     staleTime: 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
