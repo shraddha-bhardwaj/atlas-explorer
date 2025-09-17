@@ -1,29 +1,18 @@
-import { NextResponse } from "next/server";
 import countryService from "@/services/countryService";
+import { apiHandler, successResponse, errorResponse } from "@/utils/apiError";
 
-export async function GET(request, { params }) {
-  try {
-    const { code } = await params;
+export const GET = apiHandler(async (request, { params }) => {
+  const { code } = await params;
 
-    if (!code) {
-      return NextResponse.json(
-        { error: "Country code is required" },
-        { status: 400 }
-      );
-    }
-
-    const country = await countryService.getCountryDetails(code);
-
-    if (!country) {
-      return NextResponse.json({ error: "Country not found" }, { status: 404 });
-    }
-
-    return NextResponse.json(country);
-  } catch (error) {
-    console.error("Error in country details API:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch country details", message: error.message },
-      { status: 500 }
-    );
+  if (!code) {
+    return errorResponse("Country code is required", 400);
   }
-}
+
+  const country = await countryService.getCountryDetails(code);
+
+  if (!country) {
+    return errorResponse("Country not found", 404);
+  }
+
+  return successResponse(country);
+});

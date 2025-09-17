@@ -1,15 +1,7 @@
-import { NextResponse } from "next/server";
 import countryService from "@/services/countryService";
+import { apiHandler, successResponse } from "@/utils/apiError";
 
-export async function GET() {
-  try {
-    const continents = await countryService.getContinents();
-    return NextResponse.json(continents);
-  } catch (error) {
-    console.error("Error in continents API:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch continents", message: error.message },
-      { status: 500 }
-    );
-  }
-}
+export const GET = apiHandler(async () => {
+  const continents = await countryService.getContinents();
+  return successResponse(continents);
+});
