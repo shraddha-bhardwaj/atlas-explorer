@@ -19,12 +19,13 @@ export default function SearchComponent() {
     handleSortChange,
     handlePageChange,
     handleSearch,
-    countries,
+    countriesData,
     isCountriesDataLoading,
     isCountriesDataError,
     isCountriesDataFetching,
   } = useSearchPage({ query, continent, page, sortBy });
 
+  const countries = countriesData?.countries || [];
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white shadow-sm border-b">
@@ -54,9 +55,9 @@ export default function SearchComponent() {
               <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
             ) : (
               <p className="text-gray-600">
-                {countries?.totalCount === 0
+                {countriesData?.totalCount === 0
                   ? "No countries found"
-                  : `Search results with ${countries?.totalCount} countries`}
+                  : `Search results with ${countriesData?.totalCount} countries`}
                 {query && (
                   <span>
                     {" "}
@@ -124,7 +125,7 @@ export default function SearchComponent() {
 
         {!isCountriesDataLoading &&
           !isCountriesDataError &&
-          countries.length === 0 && (
+          countriesData.length === 0 && (
             <div className="text-center py-12">
               <div className="text-gray-400 mb-4">
                 <svg
@@ -157,20 +158,20 @@ export default function SearchComponent() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
                 {countries.map((country) => (
                   <CountryCard
-                    key={country.cca2 || country.cca3}
+                    key={country?.cca2 || country?.cca3}
                     country={country}
                   />
                 ))}
               </div>
             </>
           )}
-        {countries?.totalPages > 1 && (
+        {countriesData?.totalPages > 1 && (
           <Pagination
-            currentPage={countries?.currentPage}
-            totalPages={countries?.totalPages}
+            currentPage={countriesData?.currentPage}
+            totalPages={countriesData?.totalPages}
             onPageChange={handlePageChange}
-            hasNextPage={countries?.hasNextPage}
-            hasPrevPage={countries?.hasPrevPage}
+            hasNextPage={countriesData?.hasNextPage}
+            hasPrevPage={countriesData?.hasPrevPage}
           />
         )}
       </div>

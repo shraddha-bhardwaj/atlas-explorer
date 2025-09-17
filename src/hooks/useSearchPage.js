@@ -23,8 +23,6 @@ export function useSearchPage({
     limit,
   });
 
-  const countries = countriesData?.countries || [];
-
   const handleSortChange = (e) => {
     const newSortBy = e.target.value;
     const params = createSearchParams({
@@ -59,7 +57,7 @@ export function useSearchPage({
     handleSortChange,
     handlePageChange,
     handleSearch,
-    countries,
+    countriesData,
     isCountriesDataLoading,
     isCountriesDataError,
     isCountriesDataFetching,
