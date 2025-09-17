@@ -40,3 +40,13 @@ export function formatContinents(continents) {
   if (!Array.isArray(continents) || continents.length === 0) return "N/A";
   return continents.join(", ");
 }
+
+export function formatArea(area) {
+  if (!area) return "N/A";
+  return `${new Intl.NumberFormat().format(area)} km²`;
+}
+
+export function formatTimezones(timezones) {
+  if (!Array.isArray(timezones) || timezones.length === 0) return "N/A";
+  return timezones.slice(0, 3).join(", ") + (timezones.length > 3 ? "..." : "");
+}
