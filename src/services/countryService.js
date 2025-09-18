@@ -1,6 +1,6 @@
 import axios from "axios";
+import countryRepository from "@/repositories/CountryRepository";
 import { connectToDatabase } from "@/lib/mongodb";
-import Country from "@/models/Country";
 import { throwError } from "@/utils/apiError";
 
 class CountryService {
@@ -39,15 +39,14 @@ class CountryService {
   /* Populate MongoDB with countries data from API */
   async populateDatabase() {
     try {
-      await connectToDatabase();
-
-      // If countries already exists then skip population
-      const existingCount = await Country.countDocuments();
-      if (existingCount > 0) {
-        console.log(`Database already contains ${existingCount} countries.`);
+      const existingCountries = await countryRepository.countDocuments();
+      if (existingCountries > 0) {
+        console.log(
+          `Database already contains ${existingCountries} countries.`
+        );
         return {
-          message: `Database already populated with ${existingCount} countries`,
-          count: existingCount,
+          message: `Database already populated with ${existingCountries} countries`,
+          count: existingCountries,
         };
       }
 
@@ -55,7 +54,7 @@ class CountryService {
       const countriesData = await this.fetchAllCountriesFromAPI();
 
       console.log(`Inserting ${countriesData.length} countries into DB`);
-      await Country.insertMany(countriesData);
+      await countryRepository.insertMany(countriesData);
 
       console.log("Database population completed successfully");
       return {
@@ -165,7 +164,6 @@ class CountryService {
   async searchCountriesFromDB(query, continent, page, limit, sortBy) {
     try {
       await connectToDatabase();
-
       let filter = {};
 
       //Searching
@@ -197,17 +195,13 @@ class CountryService {
           break;
       }
 
-      //Query execution with filters and sort info, and pagination
+      const skip = (page - 1) * limit;
+      const select =
+        "name cca2 cca3 capital region subregion population flags currencies continents";
+
       const [countries, totalCount] = await Promise.all([
-        Country.find(filter)
-          .select(
-            "name cca2 cca3 capital region subregion population flags currencies continents"
-          )
-          .sort(sort)
-          .skip((page - 1) * limit)
-          .limit(limit)
-          .lean(),
-        Country.countDocuments(filter),
+        countryRepository.findCountries(filter, sort, skip, limit, select),
+        countryRepository.countDocuments(filter),
       ]);
 
       return {
@@ -239,7 +233,7 @@ class CountryService {
         ];
       } else {
         await connectToDatabase();
-        const continents = await Country.distinct("continents");
+        const continents = await countryRepository.distinct("continents");
         return continents.sort();
       }
     } catch (error) {
@@ -312,10 +306,11 @@ class CountryService {
         filter.continents = continent;
       }
 
-      const countries = await Country.find(filter)
-        .select("name")
-        .limit(limit)
-        .lean();
+      const countries = await countryRepository.findWithLimit(
+        filter,
+        "name",
+        limit
+      );
 
       return countries.map((country) => ({
         name: country.name.common,
@@ -361,14 +356,14 @@ class CountryService {
   async getCountryDetailsFromDB(countryCode) {
     try {
       await connectToDatabase();
-      const country = await Country.findOne({
+      const filter = {
         $or: [
           { cca2: countryCode.toUpperCase() },
           { cca3: countryCode.toUpperCase() },
         ],
-      }).lean();
+      };
 
-      return country;
+      return await countryRepository.findOne(filter);
     } catch (error) {
       console.error("Error getting country details from DB:", error);
       throwError(error, "Database query failed");
