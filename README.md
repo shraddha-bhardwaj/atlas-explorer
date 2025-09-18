@@ -46,7 +46,10 @@ Display countries around the world. Search by name, filter by continent, and dee
    REST_COUNTRIES_API_URL=https://restcountries.com/v3.1
    USE_API_DATA_SOURCE=false
    ```
-
+If you dont need DB setup locally skip 2, just use 
+```
+MONGODB_URI=mongodb+srv://naman:country-explorer-db-pass@country-explorer-db.dqnx1mn.mongodb.net/?retryWrites=true&w=majority&appName=country-explorer-db
+```
 4. **Launch the app**
    ```bash
    npm run dev
