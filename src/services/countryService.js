@@ -1,6 +1,7 @@
 import axios from "axios";
 import { connectToDatabase } from "@/lib/mongodb";
 import Country from "@/models/Country";
+import { throwError } from "@/utils/apiError";
 
 class CountryService {
   constructor() {
@@ -31,7 +32,7 @@ class CountryService {
       return response.data;
     } catch (error) {
       console.error("Error fetching countries from API:", error);
-      throw new Error(`Failed to fetch countries from API: ${error.message}`);
+      throwError(error, "Failed to fetch countries from API");
     }
   }
 
@@ -63,7 +64,7 @@ class CountryService {
       };
     } catch (error) {
       console.error("Error populating database:", error);
-      throw error;
+      throwError(error, "Database population failed");
     }
   }
 
@@ -95,7 +96,7 @@ class CountryService {
       }
     } catch (error) {
       console.error("Error searching countries:", error);
-      throw error;
+      throwError(error, "Country search failed");
     }
   }
 
@@ -156,7 +157,7 @@ class CountryService {
           hasPrevPage: false,
         };
       }
-      throw error;
+      throwError(error, "API search failed");
     }
   }
 
@@ -180,7 +181,7 @@ class CountryService {
       if (continent) {
         filter.continents = continent;
       }
-
+      throw new AppError("Test error", 400);
       //Sorting info
       let sort = {};
       switch (sortBy) {
@@ -219,7 +220,7 @@ class CountryService {
       };
     } catch (error) {
       console.error("Error searching countries from DB:", error);
-      throw error;
+      throwError(error, "Database search failed");
     }
   }
 
@@ -243,7 +244,7 @@ class CountryService {
       }
     } catch (error) {
       console.error("Error getting continents:", error);
-      throw error;
+      throwError(error, "Failed to fetch continents");
     }
   }
 
@@ -257,7 +258,7 @@ class CountryService {
       }
     } catch (error) {
       console.error("Error getting country suggestions:", error);
-      throw error;
+      throwError(error, "Failed to get country suggestions");
     }
   }
 
@@ -290,7 +291,8 @@ class CountryService {
       if (error.response?.status === 404) {
         return [];
       }
-      throw error;
+
+      throwError(error, "Failed to fetch suggestions from API");
     }
   }
 
@@ -321,7 +323,7 @@ class CountryService {
       }));
     } catch (error) {
       console.error("Error getting suggestions from DB:", error);
-      throw error;
+      throwError(error, "Database suggestions failed");
     }
   }
 
@@ -335,7 +337,7 @@ class CountryService {
       }
     } catch (error) {
       console.error("Error getting country details:", error);
-      throw error;
+      throwError(error, "Failed to get country details");
     }
   }
 
@@ -350,7 +352,8 @@ class CountryService {
       if (error.response?.status === 404) {
         return null;
       }
-      throw error;
+
+      throwError(error, "Failed to fetch country details from API");
     }
   }
 
@@ -368,7 +371,7 @@ class CountryService {
       return country;
     } catch (error) {
       console.error("Error getting country details from DB:", error);
-      throw error;
+      throwError(error, "Database query failed");
     }
   }
 
