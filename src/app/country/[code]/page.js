@@ -14,6 +14,7 @@ import {
 } from "@/utils/helpers";
 import ErrorCard from "@/components/ErrorCard";
 import Button from "@/components/Button";
+import Card from "@/components/Card";
 
 export default function CountryDetails() {
   const router = useRouter();
@@ -96,7 +97,7 @@ export default function CountryDetails() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+        <Card className="overflow-hidden mb-8" padding="p-0">
           <div className="md:flex">
             <div className="md:w-1/3">
               <div className="h-64 md:h-full">
@@ -159,10 +160,10 @@ export default function CountryDetails() {
               </div>
             </div>
           </div>
-        </div>
+        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <Card>
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               Geographic Information
             </h2>
@@ -192,9 +193,9 @@ export default function CountryDetails() {
                 </p>
               </div>
             </div>
-          </div>
+          </Card>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <Card>
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               Cultural & Economic
             </h2>
@@ -224,7 +225,7 @@ export default function CountryDetails() {
                 </div>
               )}
             </div>
-          </div>
+          </Card>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import CountryCard from "@/components/CountryCard";
+import CountryCard from "./CountryCard";
 
 import Pagination from "@/components/Pagination";
 import SearchBar from "@/components/SearchBar";

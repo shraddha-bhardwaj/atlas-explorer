@@ -6,8 +6,9 @@ import {
   formatCurrencies,
   formatCapital,
 } from "@/utils/helpers";
+import Card from "../../../components/Card";
 
-export default function CountryCard({ country }) {
+export default function CountryCard({ country, onClick, className = "" }) {
   const router = useRouter();
 
   if (!country) return null;
@@ -15,16 +16,21 @@ export default function CountryCard({ country }) {
   const countryCode = country.cca2 || country.cca3;
 
   const handleCardClick = () => {
-    router.push(`/country/${countryCode}`);
+    if (typeof onClick === "function") {
+      onClick(country);
+    } else {
+      router.push(`/country/${countryCode}`);
+    }
   };
 
   const flagUrl =
     country.flags?.png || country.flags?.svg || "/placeholder-flag.svg";
 
   return (
-    <div
+    <Card
       onClick={handleCardClick}
-      className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer transform hover:-translate-y-1 border border-gray-200"
+      className={`cursor-pointer transform hover:-translate-y-1 ${className}`}
+      padding="p-0"
     >
       <div className="relative h-48 w-full overflow-hidden rounded-t-lg">
         <img
@@ -154,6 +160,6 @@ export default function CountryCard({ country }) {
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
