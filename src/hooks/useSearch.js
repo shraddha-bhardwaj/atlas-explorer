@@ -17,6 +17,7 @@ export function useSearch({
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery);
   const [continent, setContinent] = useState(initialContinent);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [hasUserTyped, setHasUserTyped] = useState(false);
 
   // Debounce the query
   useEffect(() => {
@@ -45,6 +46,7 @@ export function useSearch({
   useEffect(() => {
     if (
       enableSuggestions &&
+      hasUserTyped &&
       debouncedQuery.length >= 2 &&
       suggestions.length > 0
     ) {
@@ -52,7 +54,7 @@ export function useSearch({
     } else {
       setShowSuggestions(false);
     }
-  }, [debouncedQuery, suggestions, enableSuggestions]);
+  }, [debouncedQuery, suggestions, enableSuggestions, hasUserTyped]);
 
   // Search handler
   const handleSearch = (searchQuery = query, searchContinent = continent) => {
@@ -81,11 +83,7 @@ export function useSearch({
     setQuery("");
     setContinent("");
     setShowSuggestions(false);
-  };
-
-  // Update query handler
-  const updateQuery = (newQuery) => {
-    setQuery(newQuery);
+    setHasUserTyped(false);
   };
 
   // Update continent handler
@@ -98,6 +96,11 @@ export function useSearch({
     handleSearch();
   };
 
+  const onQueryChange = (e) => {
+    setQuery(e.target.value);
+    setHasUserTyped(true);
+  };
+
   return {
     query,
     continent,
@@ -107,13 +110,12 @@ export function useSearch({
     continents,
     suggestionsLoading: suggestionsLoading || suggestionsFetching,
     continentsLoading,
-    updateQuery,
     updateContinent,
     handleSearch,
     handleSuggestionSelect,
     clearSearch,
     setShowSuggestions,
-    onQueryChange: (e) => setQuery(e.target.value),
+    onQueryChange,
     onContinentChange: (e) => setContinent(e.target.value),
     onSubmit,
   };
