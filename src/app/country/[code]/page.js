@@ -13,6 +13,7 @@ import {
   formatTimezones,
 } from "@/utils/helpers";
 import ErrorCard from "@/components/ErrorCard";
+import Button from "@/components/Button";
 
 export default function CountryDetails() {
   const router = useRouter();
@@ -57,12 +58,7 @@ export default function CountryDetails() {
           <p className="text-gray-600 mb-6">
             The requested country could not be found.
           </p>
-          <button
-            onClick={() => router.push("/")}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Go Home
-          </button>
+          <Button onClick={() => router.push("/")}>Go Home</Button>
         </div>
       </div>
     );
@@ -76,10 +72,7 @@ export default function CountryDetails() {
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <button
-              onClick={() => router.back()}
-              className="flex items-center text-blue-600 hover:text-blue-800 font-medium"
-            >
+            <Button variant="ghost" onClick={() => router.back()}>
               <svg
                 className="w-5 h-5 mr-1"
                 fill="none"
@@ -94,13 +87,10 @@ export default function CountryDetails() {
                 />
               </svg>
               Back
-            </button>
-            <button
-              onClick={() => router.push("/")}
-              className="text-gray-600 hover:text-gray-800 font-medium"
-            >
+            </Button>
+            <Button variant="ghost" onClick={() => router.push("/")}>
               Home
-            </button>
+            </Button>
           </div>
         </div>
       </div>

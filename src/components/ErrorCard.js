@@ -1,4 +1,5 @@
 import React from "react";
+import Button from "./Button";
 
 const ErrorCard = ({ message }) => {
   return (
@@ -22,12 +23,13 @@ const ErrorCard = ({ message }) => {
         Error Loading Results
       </h3>
       <p className="text-red-700">{message}</p>
-      <button
+      <Button
+        variant="danger"
         onClick={() => window.location.reload()}
-        className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+        className="mt-4"
       >
         Try Again
-      </button>
+      </Button>
     </div>
   );
 };

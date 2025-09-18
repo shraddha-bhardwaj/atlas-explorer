@@ -7,6 +7,7 @@ import Pagination from "@/components/Pagination";
 import SearchBar from "@/components/SearchBar";
 import { useSearchPage } from "@/hooks/useSearchPage";
 import ErrorCard from "@/components/ErrorCard";
+import Button from "@/components/Button";
 
 export default function SearchComponent() {
   const searchParams = useSearchParams();
@@ -33,12 +34,9 @@ export default function SearchComponent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold text-gray-900">Search Results</h1>
-            <button
-              onClick={() => router.push("/")}
-              className="text-blue-600 hover:text-blue-800 font-medium"
-            >
+            <Button variant="ghost" onClick={() => router.push("/")}>
               ← Back to Home
-            </button>
+            </Button>
           </div>
 
           <SearchBar
