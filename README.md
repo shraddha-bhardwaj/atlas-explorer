@@ -114,7 +114,6 @@ You can switch between them using the `USE_API_DATA_SOURCE` environment variable
 
 - **Indexes** - Fast queries on common search patterns
 - **Connection Pooling** - Reuse database connections efficiently
-- **Query Optimization** - Single aggregation instead of multiple queries
 - **Pagination** - Handle large data efficiently
 
 ### Frontend Optimizations
