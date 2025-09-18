@@ -13,6 +13,7 @@ import {
   formatTimezones,
 } from "@/utils/helpers";
 import ErrorCard from "@/components/ErrorCard";
+import NotFound from "@/components/NotFound";
 import Button from "@/components/Button";
 import Card from "@/components/Card";
 
@@ -42,8 +43,12 @@ export default function CountryDetails() {
   if (countryDataError) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center w-full p-4">
-          <ErrorCard message={countryDataError?.message} />
+        <div className="text-center w-full p-4 max-w-md mx-auto">
+          <ErrorCard
+            message={
+              countryDataError?.message || "Failed to load country details"
+            }
+          />
         </div>
       </div>
     );
@@ -52,14 +57,11 @@ export default function CountryDetails() {
   if (!countryData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Country not found
-          </h1>
-          <p className="text-gray-600 mb-6">
-            The requested country could not be found.
-          </p>
-          <Button onClick={() => router.push("/")}>Go Home</Button>
+        <div className="max-w-md mx-auto p-4">
+          <NotFound
+            title="Country Not Found"
+            message={`The country with code "${countryCode}" could not be found.`}
+          />
         </div>
       </div>
     );

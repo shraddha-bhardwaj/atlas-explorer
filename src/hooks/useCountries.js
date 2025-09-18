@@ -14,20 +14,25 @@ export function useContinents() {
 
 // autocomplete country  suggestions
 export function useCountrySuggestions({ query, continent = "", limit = 8 }) {
+  const trimmedQuery = query?.trim() || "";
+
   return useQuery({
-    queryKey: ["country-suggestions", { query, continent, limit }],
+    queryKey: [
+      "country-suggestions",
+      { query: trimmedQuery, continent, limit },
+    ],
     queryFn: async () => {
-      if (!query || query.length < 2) {
+      if (!trimmedQuery || trimmedQuery.length < 2) {
         return [];
       }
       const params = createSearchParams({
-        q: query,
+        q: trimmedQuery,
         continent,
         limit,
       });
       return apiGet(`/api/countries/suggestions?${params}`);
     },
-    enabled: !!(query && query.length >= 2),
+    enabled: !!(trimmedQuery && trimmedQuery.length >= 2),
     staleTime: 10 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });

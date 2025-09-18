@@ -18,6 +18,7 @@ export function useSearch({
   const [continent, setContinent] = useState(initialContinent);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [hasUserTyped, setHasUserTyped] = useState(false);
+  const [searchError, setSearchError] = useState(null);
 
   // Debounce the query
   useEffect(() => {
@@ -44,10 +45,11 @@ export function useSearch({
 
   // Manage suggestions dropdown
   useEffect(() => {
+    const trimmedQuery = debouncedQuery.trim();
     if (
       enableSuggestions &&
       hasUserTyped &&
-      debouncedQuery.length >= 2 &&
+      trimmedQuery.length >= 2 &&
       suggestions.length > 0
     ) {
       setShowSuggestions(true);
@@ -56,20 +58,60 @@ export function useSearch({
     }
   }, [debouncedQuery, suggestions, enableSuggestions, hasUserTyped]);
 
-  // Search handler
+  const validateSearchQuery = (searchQuery) => {
+    const trimmed = searchQuery.trim();
+
+    // dont allow for empty query search
+    if (!trimmed) {
+      return { isValid: false, error: "Please enter a search term" };
+    }
+
+    // limit min length to 2
+    if (trimmed.length < 2) {
+      return {
+        isValid: false,
+        error: "Search term must be at least 2 characters long",
+      };
+    }
+
+    // limit max length
+    if (trimmed.length > 100) {
+      return {
+        isValid: false,
+        error: "Search term is too long(maximum 100 characters)",
+      };
+    }
+
+    // check for special characters
+    const invalidChars = /[^a-zA-Z0-9\s\-']/;
+    if (invalidChars.test(trimmed)) {
+      return {
+        isValid: false,
+        error: "Search term cannot contain special characters",
+      };
+    }
+
+    return { isValid: true, query: trimmed };
+  };
+
+  // Search handler with validation
   const handleSearch = (searchQuery = query, searchContinent = continent) => {
     setShowSuggestions(false);
 
-    const trimmedQuery = searchQuery.trim();
-    if (!trimmedQuery) {
+    const validation = validateSearchQuery(searchQuery);
+
+    if (!validation.isValid) {
+      setSearchError(validation.error);
       return;
     }
 
+    setSearchError(null);
+
     if (typeof onSearch === "function") {
-      onSearch({ query: trimmedQuery, continent: searchContinent });
+      onSearch({ query: validation.query, continent: searchContinent });
     } else {
       const params = createSearchParams({
-        q: trimmedQuery,
+        q: validation.query,
         continent: searchContinent,
       });
       router.push(`/search?${params}`);
@@ -98,14 +140,16 @@ export function useSearch({
 
   const onSubmit = (e) => {
     e.preventDefault();
-    if (query.trim()) {
-      handleSearch();
-    }
+    handleSearch();
   };
 
   const onQueryChange = (e) => {
     setQuery(e.target.value);
     setHasUserTyped(true);
+
+    if (searchError) {
+      setSearchError(null);
+    }
   };
 
   return {
@@ -117,6 +161,7 @@ export function useSearch({
     continents,
     suggestionsLoading: suggestionsLoading || suggestionsFetching,
     continentsLoading,
+    searchError,
     updateContinent,
     handleSearch,
     handleSuggestionSelect,

@@ -7,6 +7,7 @@ import Pagination from "@/components/Pagination";
 import SearchBar from "@/components/SearchBar";
 import { useSearchPage } from "@/hooks/useSearchPage";
 import ErrorCard from "@/components/ErrorCard";
+import EmptyState from "@/components/EmptyState";
 import Button from "@/components/Button";
 
 export default function SearchComponent() {
@@ -98,30 +99,8 @@ export default function SearchComponent() {
 
         {!isCountriesDataLoading &&
           !isCountriesDataError &&
-          countriesData.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
-                <svg
-                  className="w-16 h-16 mx-auto"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-1">
-                No countries found
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Please try again with different name or removing filters.
-              </p>
-            </div>
+          countries.length === 0 && (
+            <EmptyState query={query} continent={continent} />
           )}
 
         {!isCountriesDataLoading &&
