@@ -60,11 +60,16 @@ export function useSearch({
   const handleSearch = (searchQuery = query, searchContinent = continent) => {
     setShowSuggestions(false);
 
+    const trimmedQuery = searchQuery.trim();
+    if (!trimmedQuery) {
+      return;
+    }
+
     if (typeof onSearch === "function") {
-      onSearch({ query: searchQuery, continent: searchContinent });
+      onSearch({ query: trimmedQuery, continent: searchContinent });
     } else {
       const params = createSearchParams({
-        q: searchQuery,
+        q: trimmedQuery,
         continent: searchContinent,
       });
       router.push(`/search?${params}`);
@@ -93,7 +98,9 @@ export function useSearch({
 
   const onSubmit = (e) => {
     e.preventDefault();
-    handleSearch();
+    if (query.trim()) {
+      handleSearch();
+    }
   };
 
   const onQueryChange = (e) => {
