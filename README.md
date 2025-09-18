@@ -57,6 +57,12 @@ Visit `http://localhost:3000` and start exploring! 🌍
 
 ## Architecture & Design
 
+### HLD
+<img width="4502" height="2447" alt="Untitled-2024-06-27-1547" src="https://github.com/user-attachments/assets/59283f16-97d1-4bd8-b8bf-0d0c49e53675" />
+
+
+
+
 ### Clean Architecture Layers
 
 This app is built using a **layered architecture** that keeps code organized and maintainable:
@@ -141,6 +147,7 @@ Here's how data moves through the app:
 - User-friendly error messages
 - Comprehensive logging for debuggings
 - Avoiding empty searches
+- Validation on search (min limit, max limit and special chars check)
 
 ### Maintainability
 
