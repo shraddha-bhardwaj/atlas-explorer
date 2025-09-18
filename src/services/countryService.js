@@ -181,7 +181,7 @@ class CountryService {
       if (continent) {
         filter.continents = continent;
       }
-      throw new AppError("Test error", 400);
+
       //Sorting info
       let sort = {};
       switch (sortBy) {
