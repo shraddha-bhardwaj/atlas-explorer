@@ -20,6 +20,17 @@ export function useSearch({
   const [hasUserTyped, setHasUserTyped] = useState(false);
   const [searchError, setSearchError] = useState(null);
 
+  useEffect(() => {
+    setQuery(initialQuery);
+    setDebouncedQuery(initialQuery);
+    setHasUserTyped(false);
+    setSearchError(null);
+  }, [initialQuery]);
+
+  useEffect(() => {
+    setContinent(initialContinent);
+  }, [initialContinent]);
+
   // Debounce the query
   useEffect(() => {
     const timer = setTimeout(() => {
