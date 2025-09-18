@@ -1,36 +1,153 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Country Explorer
 
-## Getting Started
+Display countries around the world. Search by name, filter by continent, and deep dive into country details.
 
-First, run the development server:
+## Tech Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+**Frontend**
+
+- NextJS : Full stack web framework
+- TailwindCSS: Styling CSS Framework
+- TanStack Query: Library for caching and state management
+
+**Backend**
+
+- Next.js API Routes: For routing to necesary API endpoints
+- MongoDB with Mongoose: MongoDB as NoSQL DB and Mongoose as an ORM.
+- Axios: HTTP Client for external APIs.
+
+**Data Sources**
+
+- REST Countries API - External API
+- MongoDB - Database for countries and info
+
+## Quick Setup
+
+1. **Get the code**
+
+   ```bash
+   git clone git@github.com:naman360/country-explorer.git
+   cd country-explorer
+   npm install
+   ```
+
+2. **Start the database**
+
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Configure environment**
+
+   Create `.env.local`:
+
+   ```
+   MONGODB_URI=mongodb://localhost:27017/country-explorer
+   REST_COUNTRIES_API_URL=https://restcountries.com/v3.1
+   USE_API_DATA_SOURCE=false
+   ```
+
+4. **Launch the app**
+   ```bash
+   npm run dev
+   npm run populate-db
+   ```
+
+Visit `http://localhost:3000` and start exploring! 🌍
+
+## Architecture & Design
+
+### Clean Architecture Layers
+
+This app is built using a **layered architecture** that keeps code organized and maintainable:
+
+```
+Controllers → Services → Repositories → Models
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Why this approach?**
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- Each layer has one clear responsibility for separating concerns
+- Code is more readable and maintainable
+- New features can be added easily
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Repository Pattern
 
-## Learn More
+Instead of mixing database code with business logic, I separated them:
 
-To learn more about Next.js, take a look at the following resources:
+**Repository Layer** (`src/repositories/`)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Pure data access - just talks to the database
+- No business logic or calculations
+- Easy to swap DB
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Service Layer** (`src/services/`)
 
-## Deploy on Vercel
+- Contains all the business logic
+- Handles data validation and transformation
+- Manages the flow between different data sources
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Singleton Pattern
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Both services and repositories use the **singleton pattern** - meaning we create just one instance that gets shared across the whole app. This saves memory and ensures consistent behavior.
+
+```javascript
+// One instance for the entire app
+const countryServiceObject = new CountryService();
+export default countryServiceObject;
+```
+
+## Design Decisions
+
+### Hybrid Data Strategy
+
+The app can work with two data sources as per requirement:
+
+1. **REST Countries API**
+2. **MongoDB**
+
+You can switch between them using the `USE_API_DATA_SOURCE` environment variable.
+
+## Performance Optimizations
+
+### Backend Optimisations
+
+- **Indexes** - Fast queries on common search patterns
+- **Connection Pooling** - Reuse database connections efficiently
+- **Query Optimization** - Single aggregation instead of multiple queries
+- **Pagination** - Handle large data efficiently
+
+### Frontend Optimizations
+
+- **Caching** - TanStack Query optimizes data fetching
+- **Debouncing** - Minimises API calls by calling API with some time delay after user has finished writing
+- **TailwindCSS** - Does not bloat CSS build, only ships the used classes
+
+## Data Flow
+
+Here's how data moves through the app:
+
+1. **User searches** → Frontend sends request
+2. **API Route** receives request → Validates parameters
+3. **Service Layer** → Builds search filters and business logic
+4. **Repository** → Executes database query
+5. **Results return** → Service formats data → API returns response
+6. **Frontend updates** → TanStack Query caches and displays results
+
+## Code Quality
+
+### Error handling
+
+- Fallback UI when services are down or returns error
+- User-friendly error messages
+- Comprehensive logging for debuggings
+- Avoiding empty searches
+
+### Maintainability
+
+- Clear separation of concerns
+- Consistent code patterns
+- Easy to add new features
+- Simple to modify existing functionality
+- Consistent naming conventions
+- Generic error management
