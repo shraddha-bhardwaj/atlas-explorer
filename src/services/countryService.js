@@ -1,7 +1,7 @@
 import axios from "axios";
 import countryRepository from "@/repositories/CountryRepository";
 import { connectToDatabase } from "@/lib/mongodb";
-import { throwError } from "@/utils/apiError";
+import { throwError, tryAsync } from "@/utils/apiError";
 
 class CountryService {
   constructor() {
@@ -12,7 +12,7 @@ class CountryService {
 
   /* Fetch all countries from the REST API */
   async fetchAllCountriesFromAPI() {
-    try {
+    return await tryAsync(async () => {
       const basicFields =
         "name,cca2,cca3,capital,region,population,flags,currencies,continents";
       let response;
@@ -23,22 +23,18 @@ class CountryService {
         });
       } catch (fieldsError) {
         console.log("Fields parameter failed");
-
         response = await axios.get(`${this.apiUrl}/all`, {
           timeout: 30000,
         });
       }
 
       return response.data;
-    } catch (error) {
-      console.error("Error fetching countries from API:", error);
-      throwError(error, "Failed to fetch countries from API");
-    }
+    }, "Failed to fetch countries from API");
   }
 
   /* Populate MongoDB with countries data from API */
   async populateDatabase() {
-    try {
+    return await tryAsync(async () => {
       const existingCountries = await countryRepository.countDocuments();
       if (existingCountries > 0) {
         console.log(
@@ -61,10 +57,7 @@ class CountryService {
         message: "Database populated successfully",
         count: countriesData.length,
       };
-    } catch (error) {
-      console.error("Error populating database:", error);
-      throwError(error, "Database population failed");
-    }
+    }, "Database population failed");
   }
 
   /* Search countries with filters and options */
@@ -75,7 +68,7 @@ class CountryService {
     limit = 12,
     sortBy = "name"
   ) {
-    try {
+    return await tryAsync(async () => {
       if (this.useApiDataSource) {
         return await this.searchCountriesFromAPI(
           query,
@@ -93,10 +86,7 @@ class CountryService {
           sortBy
         );
       }
-    } catch (error) {
-      console.error("Error searching countries:", error);
-      throwError(error, "Country search failed");
-    }
+    }, "Country search failed");
   }
 
   /*Search countries from API*/
@@ -162,7 +152,7 @@ class CountryService {
 
   /* Search countries from MongoDB */
   async searchCountriesFromDB(query, continent, page, limit, sortBy) {
-    try {
+    return await tryAsync(async () => {
       await connectToDatabase();
       let filter = {};
 
@@ -212,15 +202,12 @@ class CountryService {
         hasNextPage: page < Math.ceil(totalCount / limit),
         hasPrevPage: page > 1,
       };
-    } catch (error) {
-      console.error("Error searching countries from DB:", error);
-      throwError(error, "Database search failed");
-    }
+    }, "Database search failed");
   }
 
   /*Get all continents*/
   async getContinents() {
-    try {
+    return await tryAsync(async () => {
       if (this.useApiDataSource) {
         return [
           "Africa",
@@ -236,10 +223,7 @@ class CountryService {
         const continents = await countryRepository.distinct("continents");
         return continents.sort();
       }
-    } catch (error) {
-      console.error("Error getting continents:", error);
-      throwError(error, "Failed to fetch continents");
-    }
+    }, "Failed to fetch continents");
   }
 
   /* Autocomplete country suggestions */
@@ -292,7 +276,7 @@ class CountryService {
 
   /*suggestions from MongoDB*/
   async getCountrySuggestionsFromDB(query, continent, limit) {
-    try {
+    return await tryAsync(async () => {
       await connectToDatabase();
 
       let filter = {
@@ -316,10 +300,7 @@ class CountryService {
         name: country.name.common,
         official: country.name.official,
       }));
-    } catch (error) {
-      console.error("Error getting suggestions from DB:", error);
-      throwError(error, "Database suggestions failed");
-    }
+    }, "Database suggestions failed");
   }
 
   /*get country details by country code*/

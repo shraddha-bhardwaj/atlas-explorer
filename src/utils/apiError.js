@@ -76,6 +76,16 @@ export function throwError(error, msgContext = "") {
   throw new AppError(message, statusCode);
 }
 
+// async try-catch wrapper for service methods
+export async function tryAsync(asyncFn, msgContext = "") {
+  try {
+    return await asyncFn();
+  } catch (error) {
+    console.error(`Error in ${msgContext}:`, error);
+    throwError(error, msgContext);
+  }
+}
+
 // wrapper for api routes to handle try-catch
 export function apiHandler(handler) {
   return async (request, msgContext) => {
