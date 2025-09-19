@@ -28,43 +28,33 @@ Display countries around the world. Search by name, filter by continent, and dee
    ```bash
    git clone git@github.com:naman360/country-explorer.git
    cd country-explorer
-   npm install
    ```
 
-2. **Start the database**
+2. **Build and start the services**
 
    ```bash
-   docker-compose up -d
+   docker-compose up --build -d
    ```
 
-3. **Configure environment**
+3. **Populate the database**
 
-   Create `.env.local`:
-
-   ```
-   MONGODB_URI=mongodb://localhost:27017/country-explorer
-   REST_COUNTRIES_API_URL=https://restcountries.com/v3.1
-   USE_API_DATA_SOURCE=false
-   ```
-If you dont need DB setup locally skip 2, just use 
-```
-MONGODB_URI=mongodb+srv://naman:country-explorer-db-pass@country-explorer-db.dqnx1mn.mongodb.net/?retryWrites=true&w=majority&appName=country-explorer-db
-```
-4. **Launch the app**
    ```bash
-   npm run dev
-   npm run populate-db
+   docker-compose run --rm client-app npm run populate-db
    ```
 
-Visit `http://localhost:3000` and start exploring! 🌍
+   **Note:** If you are using the deployed MongoDB Instance URI, then you do not need to run the populate script, just update the URI in compose file and re run.
+
+   ```
+   MONGODB_URI=mongodb+srv://naman:country-explorer-db-pass@country-explorer-db.dqnx1mn.mongodb.net/?retryWrites=true&w=majority&appName=country-explorer-db
+   ```
+
+Visit `http://localhost:3000` and start exploring!
 
 ## Architecture & Design
 
 ### HLD
+
 <img width="4502" height="2447" alt="Untitled-2024-06-27-1547" src="https://github.com/user-attachments/assets/59283f16-97d1-4bd8-b8bf-0d0c49e53675" />
-
-
-
 
 ### Clean Architecture Layers
 
