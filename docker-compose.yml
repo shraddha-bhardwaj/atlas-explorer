@@ -1,6 +1,21 @@
 version: "3.8"
 
 services:
+  client-app:
+    build: .
+    container_name: country-explorer-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/country-explorer
+      - USE_API_DATA_SOURCE=false
+      - REST_COUNTRIES_API_URL=https://restcountries.com/v3.1
+      - ITEMS_PER_PAGE=12
+      - NODE_ENV=production
+    depends_on:
+      - mongodb
+
   mongodb:
     image: mongo:7.0
     container_name: country-explorer-mongodb
