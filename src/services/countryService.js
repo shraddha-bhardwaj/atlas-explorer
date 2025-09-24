@@ -205,10 +205,39 @@ class CountryService {
       const select =
         "name cca2 cca3 capital region subregion population flags currencies continents";
 
-      const [countries, totalCount] = await Promise.all([
-        countryRepository.findCountries(filter, sort, skip, limit, select),
-        countryRepository.countDocuments(filter),
-      ]);
+      const pipeline = [
+        { $match: filter },
+        {
+          $facet: {
+            results: [
+              { $sort: sort },
+              { $skip: skip },
+              { $limit: limit },
+              {
+                $project: {
+                  _id: 0,
+                  name: 1,
+                  cca2: 1,
+                  cca3: 1,
+                  capital: 1,
+                  region: 1,
+                  subregion: 1,
+                  population: 1,
+                  flags: 1,
+                  currencies: 1,
+                  continents: 1,
+                },
+              },
+            ],
+
+            totalCount: [{ $count: "count" }],
+          },
+        },
+      ];
+
+      const [result] = await countryRepository.aggregate(pipeline);
+      const countries = result.results;
+      const totalCount = result.totalCount[0]?.count || 0;
 
       return {
         countries,
@@ -303,16 +332,19 @@ class CountryService {
         filter.continents = continent;
       }
 
-      const countries = await countryRepository.findWithLimit(
-        filter,
-        "name",
-        limit
-      );
+      const pipeline = [
+        { $match: filter },
+        {
+          $project: {
+            _id: 0,
+            name: "$name.common",
+            official: "$name.official",
+          },
+        },
+        { $limit: limit },
+      ];
 
-      return countries.map((country) => ({
-        name: country.name.common,
-        official: country.name.official,
-      }));
+      return await countryRepository.aggregate(pipeline);
     }, "Database suggestions failed");
   }
 
