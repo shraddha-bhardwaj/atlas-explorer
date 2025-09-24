@@ -1,8 +1,4 @@
-"use client";
-
-import { useRouter, useParams } from "next/navigation";
-import LoadingSpinner from "@/components/LoadingSpinner";
-import { useCountryDetails } from "@/hooks/useCountries";
+import countryService from "@/services/countryService";
 import {
   formatPopulation,
   formatArea,
@@ -12,47 +8,64 @@ import {
   formatContinents,
   formatTimezones,
 } from "@/utils/helpers";
-import ErrorCard from "@/components/ErrorCard";
 import NotFound from "@/components/NotFound";
-import Button from "@/components/Button";
 import Card from "@/components/Card";
+import { BackButton, HomeButton } from "./CountryDetailsClient";
 
-export default function CountryDetails() {
-  const router = useRouter();
-  const params = useParams();
-
+export async function generateMetadata({ params }) {
   const countryCode = params.code;
 
-  const {
-    data: countryData,
-    isLoading: isCountryDataLoading,
-    error: countryDataError,
-  } = useCountryDetails(countryCode);
+  try {
+    const countryData = await countryService.getCountryDetails(countryCode);
 
-  if (isCountryDataLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <LoadingSpinner size="xl" />
-          <p className="mt-4 text-gray-600">Loading country details...</p>
-        </div>
-      </div>
-    );
-  }
+    if (!countryData) {
+      return {
+        title: "Country Not Found",
+        description: "The requested country could not be found.",
+      };
+    }
 
-  if (countryDataError) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center w-full p-4 max-w-md mx-auto">
-          <ErrorCard
-            message={
-              countryDataError?.message || "Failed to load country details"
-            }
-          />
-        </div>
-      </div>
-    );
+    return {
+      title: `${countryData.name?.common} - Country Explorer`,
+      description: `Discover ${
+        countryData.name?.common
+      }. Population: ${formatPopulation(
+        countryData.population
+      )}, Capital: ${formatCapital(countryData.capital)}, Region: ${
+        countryData.region
+      }.`,
+      openGraph: {
+        title: `${countryData.name?.common} - Country Explorer`,
+        description: `Learn about ${countryData.name?.common} - ${countryData.region}`,
+        images: [
+          countryData.flags?.png ||
+            countryData.flags?.svg ||
+            "/placeholder-flag.svg",
+        ],
+      },
+    };
+  } catch (error) {
+    console.error("Error generating metadata:", error);
+    return {
+      title: "Country Details",
+      description: "Country information and details.",
+    };
   }
+}
+
+async function getCountryData(countryCode) {
+  try {
+    const countryData = await countryService.getCountryDetails(countryCode);
+    return countryData;
+  } catch (error) {
+    console.error("Error fetching country data:", error);
+    return null;
+  }
+}
+
+export default async function CountryDetails({ params }) {
+  const countryCode = params.code;
+  const countryData = await getCountryData(countryCode);
 
   if (!countryData) {
     return (
@@ -75,7 +88,7 @@ export default function CountryDetails() {
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <Button variant="ghost" onClick={() => router.back()}>
+            <BackButton>
               <svg
                 className="w-5 h-5 mr-1"
                 fill="none"
@@ -90,10 +103,8 @@ export default function CountryDetails() {
                 />
               </svg>
               Back
-            </Button>
-            <Button variant="ghost" onClick={() => router.push("/")}>
-              Home
-            </Button>
+            </BackButton>
+            <HomeButton>Home</HomeButton>
           </div>
         </div>
       </div>
