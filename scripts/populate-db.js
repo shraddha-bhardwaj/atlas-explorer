@@ -1,5 +1,6 @@
 const { MongoClient } = require("mongodb");
 const axios = require("axios");
+require("dotenv").config();
 
 console.log("DB Population Script");
 
