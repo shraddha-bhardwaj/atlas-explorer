@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const CountrySchema = new mongoose.Schema(
   {
     name: {
-      common: { type: String, required: true, index: true },
+      common: { type: String, required: true },
       official: { type: String, required: true },
     },
     cca2: { type: String, required: true, unique: true },
@@ -29,7 +29,7 @@ const CountrySchema = new mongoose.Schema(
       of: String,
     },
     timezones: [{ type: String }],
-    continents: [{ type: String, index: true }],
+    continents: [{ type: String }],
     latlng: [{ type: Number }],
     capitalInfo: {
       latlng: [Number],

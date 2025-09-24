@@ -8,6 +8,23 @@ class CountryService {
     this.apiUrl =
       process.env.REST_COUNTRIES_API_URL || "https://restcountries.com/v3.1";
     this.useApiDataSource = process.env.USE_API_DATA_SOURCE === "true";
+
+    if (!this.useApiDataSource) {
+      this.initializeDatabase();
+    }
+  }
+
+  async initializeDatabase() {
+    try {
+      await connectToDatabase();
+    } catch (error) {
+      console.error(
+        "CountryService: Failed to connect to MongoDB:",
+        error.message
+      );
+      console.log("Falling back to external API");
+      this.useApiDataSource = true;
+    }
   }
 
   /* Fetch all countries from the REST API */
@@ -153,7 +170,6 @@ class CountryService {
   /* Search countries from MongoDB */
   async searchCountriesFromDB(query, continent, page, limit, sortBy) {
     return await tryAsync(async () => {
-      await connectToDatabase();
       let filter = {};
 
       //Searching
@@ -219,7 +235,6 @@ class CountryService {
           "South America",
         ];
       } else {
-        await connectToDatabase();
         const continents = await countryRepository.distinct("continents");
         return continents.sort();
       }
@@ -277,8 +292,6 @@ class CountryService {
   /*suggestions from MongoDB*/
   async getCountrySuggestionsFromDB(query, continent, limit) {
     return await tryAsync(async () => {
-      await connectToDatabase();
-
       let filter = {
         $or: [
           { "name.common": { $regex: query, $options: "i" } },
@@ -336,7 +349,6 @@ class CountryService {
   /*Get country details from MongoDB */
   async getCountryDetailsFromDB(countryCode) {
     try {
-      await connectToDatabase();
       const filter = {
         $or: [
           { cca2: countryCode.toUpperCase() },
