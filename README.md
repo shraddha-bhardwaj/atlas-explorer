@@ -26,8 +26,8 @@ Display countries around the world. Search by name, filter by continent, and dee
 1. **Get the code**
 
    ```bash
-   git clone git@github.com:naman360/country-explorer.git
-   cd country-explorer
+   git clone https://github.com/shraddha-bhardwaj/atlas-explorer.git
+   cd atlas-explorer
    ```
 
 2. **Build and start the services**
