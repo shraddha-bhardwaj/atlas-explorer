@@ -1,4 +1,4 @@
-# Country Explorer
+# Atlas Explorer
 
 Display countries around the world. Search by name, filter by continent, and deep dive into country details.
 
